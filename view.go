@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
-	"io"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -38,43 +36,23 @@ func viewAction(c *cli.Context) error {
 		log.Fatalf("Skipping directory: %s\n", filename)
 	}
 
-	err = viewFile(name, filename)
+	err = decryptFileAndPrint(name, filename)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return nil
 }
 
-func viewFile(name, filename string) error {
+func decryptFileAndPrint(name, filename string) error {
 	fp, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	if err != nil {
 		return xerrors.Errorf("open: %w", err)
 	}
 	defer fp.Close()
 
-	headerByte := make([]byte, vaultHeaderSize)
-	_, err = fp.ReadAt(headerByte, 0)
-	if err != nil && err != io.EOF {
-		return xerrors.Errorf("read header: %w", err)
-	}
-
-	if !isVaultHeader(headerByte) {
-		return xerrors.Errorf("not vault file: %s\n", filename)
-	}
-
-	file, err := ioutil.ReadAll(fp)
+	plainText, err := decryptFile(name, fp)
 	if err != nil {
-		return xerrors.Errorf("readall: %w", err)
-	}
-
-	cypherText, err := parse(file)
-	if err != nil {
-		return xerrors.Errorf("parse: %w", err)
-	}
-
-	plainText, err := kmsDecrypt(name, cypherText)
-	if err != nil {
-		return err
+		return xerrors.Errorf("decryptFileAndPrint: %w", err)
 	}
 
 	fmt.Println(string(plainText))
