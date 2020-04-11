@@ -5,6 +5,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -56,25 +57,34 @@ func main() {
 
 const configName = ".vault"
 
-func loadConfig() (config *ConfigFile) {
-	config = &ConfigFile{
+func loadConfig() (config *VaultConfig) {
+	config = &VaultConfig{
 		Location: "global",
 	}
-	_, err := os.Stat(configName)
+
+	dir, err := os.Getwd()
 	if err != nil {
-		log.Println(err)
 		return
 	}
-	fp, err := os.Open(configName)
+
+	for ; ; dir = filepath.Dir(dir) {
+		_, err := os.Stat(filepath.Join(dir, configName))
+		if err == nil {
+			break
+		}
+		if dir == filepath.Dir(dir) {
+			return
+		}
+	}
+
+	fp, err := os.Open(filepath.Join(dir, configName))
 	if err != nil {
-		log.Println(err)
 		return
 	}
 	defer fp.Close()
 	d := yaml.NewDecoder(fp)
 	err = d.Decode(config)
 	if err != nil {
-		log.Println(err)
 		return
 	}
 	return

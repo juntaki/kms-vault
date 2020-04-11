@@ -15,7 +15,7 @@ func configCommand(kmsFlags []cli.Flag) cli.Command {
 	}
 }
 
-type ConfigFile struct {
+type VaultConfig struct {
 	Project  string
 	Location string
 	KeyRing  string
@@ -23,7 +23,7 @@ type ConfigFile struct {
 }
 
 func configAction(c *cli.Context) error {
-	val, err := yaml.Marshal(ConfigFile{
+	val, err := yaml.Marshal(VaultConfig{
 		Project:  c.String("project"),
 		Location: c.String("location"),
 		KeyRing:  c.String("keyring"),
