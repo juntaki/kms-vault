@@ -38,6 +38,7 @@ func main() {
 	app.Flags = append([]cli.Flag{}, kmsFlags...)
 	app.Commands = []cli.Command{
 		encryptCommand,
+		decryptCommand,
 	}
 	app.Run(os.Args)
 }

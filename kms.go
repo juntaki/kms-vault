@@ -32,3 +32,23 @@ func kmsEncrypt(name string, plaintext []byte) ([]byte, error) {
 
 	return resp.Ciphertext, nil
 }
+
+func kmsDecrypt(name string, ciphertext []byte) ([]byte, error) {
+	ctx := context.Background()
+	client, err := cloudkms.NewKeyManagementClient(ctx)
+	if err != nil {
+		return nil, xerrors.Errorf("cloudkms.NewKeyManagementClient: %w", err)
+	}
+
+	// Build the request.
+	req := &kmspb.DecryptRequest{
+		Name:       name,
+		Ciphertext: ciphertext,
+	}
+	// Call the API.
+	resp, err := client.Decrypt(ctx, req)
+	if err != nil {
+		return nil, xerrors.Errorf("decrypt: %w", err)
+	}
+	return resp.Plaintext, nil
+}

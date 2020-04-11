@@ -9,14 +9,14 @@ import (
 	"os"
 )
 
-var encryptCommand = cli.Command{
-	Name:   "encrypt",
-	Usage:  "Encrypt files",
+var decryptCommand = cli.Command{
+	Name:   "decrypt",
+	Usage:  "Decrypt files",
 	Flags:  []cli.Flag{},
-	Action: encryptAction,
+	Action: decryptAction,
 }
 
-func encryptAction(c *cli.Context) error {
+func decryptAction(c *cli.Context) error {
 	name := kmsName(
 		c.GlobalString("project"),
 		c.GlobalString("location"),
@@ -35,7 +35,7 @@ func encryptAction(c *cli.Context) error {
 			continue
 		}
 
-		err = encryptFile(name, filename)
+		err = decryptFile(name, filename)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -43,7 +43,7 @@ func encryptAction(c *cli.Context) error {
 	return nil
 }
 
-func encryptFile(name, filename string) error {
+func decryptFile(name, filename string) error {
 	fp, err := os.OpenFile(filename, os.O_RDWR, 0666)
 	if err != nil {
 		return xerrors.Errorf("open: %w", err)
@@ -56,8 +56,8 @@ func encryptFile(name, filename string) error {
 		return xerrors.Errorf("read header: %w", err)
 	}
 
-	if isVaultHeader(headerByte) {
-		log.Printf("Skipping already encrypted: %s\n", filename)
+	if !isVaultHeader(headerByte) {
+		log.Printf("Skipping not vault file: %s\n", filename)
 		return nil
 	}
 
@@ -66,10 +66,12 @@ func encryptFile(name, filename string) error {
 		return xerrors.Errorf("readall: %w", err)
 	}
 
-	val, err := kmsEncrypt(
-		name,
-		file,
-	)
+	cypherText, err := parse(file)
+	if err != nil {
+		return xerrors.Errorf("parse: %w", err)
+	}
+
+	plainText, err := kmsDecrypt(name, cypherText)
 	if err != nil {
 		return err
 	}
@@ -79,10 +81,10 @@ func encryptFile(name, filename string) error {
 		return xerrors.Errorf("truncate: %w", err)
 	}
 
-	_, err = fp.WriteAt(format(val), 0)
+	_, err = fp.WriteAt(plainText, 0)
 	if err != nil {
 		return xerrors.Errorf("write: %w", err)
 	}
-	log.Printf("Encryption successful: %s\n", filename)
+	log.Printf("Decryption successful: %s\n", filename)
 	return nil
 }
