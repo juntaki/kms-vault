@@ -39,6 +39,7 @@ func main() {
 	app.Commands = []cli.Command{
 		encryptCommand,
 		decryptCommand,
+		viewCommand,
 	}
 	app.Run(os.Args)
 }
