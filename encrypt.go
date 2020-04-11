@@ -9,26 +9,26 @@ import (
 	"os"
 )
 
-var encryptCommand = cli.Command{
-	Name:   "encrypt",
-	Usage:  "Encrypt files",
-	Flags:  []cli.Flag{},
-	Action: encryptAction,
+func encryptCommand(kmsFlags []cli.Flag) cli.Command {
+	return cli.Command{
+		Name:   "encrypt",
+		Usage:  "Encrypt files",
+		Flags:  kmsFlags,
+		Action: encryptAction,
+	}
 }
 
 func encryptAction(c *cli.Context) error {
-	name := kmsName(
-		c.GlobalString("project"),
-		c.GlobalString("location"),
-		c.GlobalString("keyring"),
-		c.GlobalString("key"),
-	)
+	if len(c.Args()) == 0 {
+		return xerrors.New("Specify at least one file")
+	}
 
+	name := kmsNameFromContext(c)
 	for _, filename := range c.Args() {
 		// Skip dir
 		fstat, err := os.Stat(filename)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if fstat.IsDir() {
 			log.Printf("Skipping directory: %s\n", filename)
@@ -37,7 +37,7 @@ func encryptAction(c *cli.Context) error {
 
 		err = encryptFile(name, filename)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 	return nil

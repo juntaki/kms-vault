@@ -4,41 +4,36 @@ import (
 	"fmt"
 	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
-	"log"
 	"os"
 )
 
-var viewCommand = cli.Command{
-	Name:   "view",
-	Usage:  "View files",
-	Flags:  []cli.Flag{},
-	Action: viewAction,
+func viewCommand(kmsFlags []cli.Flag) cli.Command {
+	return cli.Command{
+		Name:   "view",
+		Usage:  "View file",
+		Flags:  kmsFlags,
+		Action: viewAction,
+	}
 }
 
 func viewAction(c *cli.Context) error {
-	name := kmsName(
-		c.GlobalString("project"),
-		c.GlobalString("location"),
-		c.GlobalString("keyring"),
-		c.GlobalString("key"),
-	)
-
 	if len(c.Args()) != 1 {
-		log.Fatal("Too many files")
+		return xerrors.New("Specify one file")
 	}
 	filename := c.Args().First()
 
+	name := kmsNameFromContext(c)
 	fstat, err := os.Stat(filename)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if fstat.IsDir() {
-		log.Fatalf("Skipping directory: %s\n", filename)
+		return xerrors.Errorf("Skipping directory: %s\n", filename)
 	}
 
 	err = decryptFileAndPrint(name, filename)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	return nil
 }

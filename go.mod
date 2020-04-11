@@ -7,4 +7,5 @@ require (
 	github.com/urfave/cli v1.22.4
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	google.golang.org/genproto v0.0.0-20200410110633-0848e9f44c36
+	gopkg.in/yaml.v2 v2.2.2
 )

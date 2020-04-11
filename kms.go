@@ -4,9 +4,19 @@ import (
 	cloudkms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"fmt"
+	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
+
+func kmsNameFromContext(c *cli.Context) string {
+	return kmsName(
+		c.String("project"),
+		c.String("location"),
+		c.String("keyring"),
+		c.String("key"),
+	)
+}
 
 func kmsName(projectID, location, ringID, keyID string) string {
 	return fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s", projectID, location, ringID, keyID)

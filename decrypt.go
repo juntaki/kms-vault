@@ -9,26 +9,26 @@ import (
 	"os"
 )
 
-var decryptCommand = cli.Command{
-	Name:   "decrypt",
-	Usage:  "Decrypt files",
-	Flags:  []cli.Flag{},
-	Action: decryptAction,
+func decryptCommand(kmsFlags []cli.Flag) cli.Command {
+	return cli.Command{
+		Name:   "decrypt",
+		Usage:  "Decrypt files",
+		Flags:  kmsFlags,
+		Action: decryptAction,
+	}
 }
 
 func decryptAction(c *cli.Context) error {
-	name := kmsName(
-		c.GlobalString("project"),
-		c.GlobalString("location"),
-		c.GlobalString("keyring"),
-		c.GlobalString("key"),
-	)
+	if len(c.Args()) == 0 {
+		return xerrors.New("Specify at least one file")
+	}
 
+	name := kmsNameFromContext(c)
 	for _, filename := range c.Args() {
 		// Skip dir
 		fstat, err := os.Stat(filename)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if fstat.IsDir() {
 			log.Printf("Skipping directory: %s\n", filename)
@@ -38,10 +38,10 @@ func decryptAction(c *cli.Context) error {
 		err = decryptFileAndWrite(name, filename)
 		if xerrors.Is(err, InvalidFormatError) {
 			log.Printf("Skipping not vault file: %s\n", filename)
-			return nil
+			return err
 		}
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 	return nil
