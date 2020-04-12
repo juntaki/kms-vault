@@ -39,7 +39,7 @@ func main() {
 	}
 
 	app := cli.NewApp()
-	app.Name = "kmsvault"
+	app.Name = "kms-vault"
 	app.Usage = "Manage configuration file that partially contain confidential information in a repository using Cloud KMS."
 	app.Version = "0.1.0"
 	app.EnableBashCompletion = true
@@ -57,7 +57,7 @@ func main() {
 	}
 }
 
-const configName = ".kmsvault.yaml"
+const configName = ".kms-vault.yaml"
 
 func loadConfig() (config *VaultConfig) {
 	config = &VaultConfig{
