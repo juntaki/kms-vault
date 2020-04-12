@@ -35,7 +35,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:     "project",
-			Usage:    "Google cloud project",
+			Usage:    "Google cloud project name.",
 			Value:    config.Project,
 			Required: config.Project == "",
 		},
@@ -66,7 +66,7 @@ func main() {
 	}
 }
 
-const configName = ".kms-vault.yaml"
+const vaultConfigFilename = ".kms-vault.yaml"
 
 func loadConfig() (config *VaultConfig) {
 	config = &VaultConfig{
@@ -79,7 +79,7 @@ func loadConfig() (config *VaultConfig) {
 	}
 
 	for ; ; dir = filepath.Dir(dir) {
-		_, err := os.Stat(filepath.Join(dir, configName))
+		_, err := os.Stat(filepath.Join(dir, vaultConfigFilename))
 		if err == nil {
 			break
 		}
@@ -88,7 +88,7 @@ func loadConfig() (config *VaultConfig) {
 		}
 	}
 
-	fp, err := os.Open(filepath.Join(dir, configName))
+	fp, err := os.Open(filepath.Join(dir, vaultConfigFilename))
 	if err != nil {
 		return
 	}

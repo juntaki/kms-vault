@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
@@ -9,9 +9,14 @@ import (
 
 func configCommand(kmsFlags []cli.Flag) cli.Command {
 	return cli.Command{
-		Name:   "config",
-		Usage:  "Create .kms-vault.yaml config file",
-		Flags:  kmsFlags,
+		Name:  "config",
+		Usage: "Create .kms-vault.yaml",
+		Flags: append([]cli.Flag{
+			cli.BoolFlag{
+				Name:  "w",
+				Usage: "Write to .kms-vault.yaml.",
+			},
+		}, kmsFlags...),
 		Action: configAction,
 	}
 }
@@ -35,6 +40,23 @@ func configAction(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Println(string(val))
+	output := os.Stdout
+	if c.Bool("w") {
+		err := checkOverwrite(vaultConfigFilename)
+		if err != nil {
+			return err
+		}
+		fp, err := os.Create(vaultConfigFilename)
+		if err != nil {
+			return err
+		}
+		defer fp.Close()
+		output = fp
+	}
+
+	_, err = output.Write(val)
+	if err != nil {
+		return err
+	}
 	return nil
 }

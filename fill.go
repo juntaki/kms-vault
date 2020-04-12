@@ -21,12 +21,12 @@ func fillCommand(kmsFlags []cli.Flag) cli.Command {
 		Flags: append([]cli.Flag{
 			cli.StringFlag{
 				Name:     "template",
-				Usage:    "",
+				Usage:    "File path of template file.",
 				Required: true,
 			},
 			cli.StringFlag{
 				Name:  "output",
-				Usage: "",
+				Usage: "File path of output.",
 			},
 		}, kmsFlags...),
 		Action: fillAction,
@@ -105,7 +105,7 @@ func fillAction(c *cli.Context) error {
 func checkOverwrite(outputFile string) error {
 	_, err := os.Stat(outputFile)
 	if err == nil {
-		fmt.Printf("File exist, overwrite? (y/N): ")
+		fmt.Print("File exist, overwrite? (y/N): ")
 		stdin := bufio.NewScanner(os.Stdin)
 		stdin.Scan()
 		text := stdin.Text()

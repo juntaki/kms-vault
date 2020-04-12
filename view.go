@@ -13,11 +13,11 @@ import (
 func viewCommand(kmsFlags []cli.Flag) cli.Command {
 	return cli.Command{
 		Name:  "view",
-		Usage: "View file",
+		Usage: "View decrypted files",
 		Flags: append([]cli.Flag{
 			cli.BoolFlag{
 				Name:  "yaml",
-				Usage: "",
+				Usage: "View the parsed data to fill template",
 			},
 		}, kmsFlags...),
 		Action: viewAction,
