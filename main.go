@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.Lshortfile | log.Lmicroseconds)
 	config := loadConfig()
 	kmsFlags := []cli.Flag{
 		cli.StringFlag{
@@ -48,6 +49,7 @@ func main() {
 		decryptCommand(kmsFlags),
 		viewCommand(kmsFlags),
 		configCommand(kmsFlags),
+		fillCommand(kmsFlags),
 	}
 	err := app.Run(os.Args)
 	if err != nil {

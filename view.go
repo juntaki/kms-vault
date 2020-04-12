@@ -4,52 +4,81 @@ import (
 	"fmt"
 	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"os"
 )
 
 func viewCommand(kmsFlags []cli.Flag) cli.Command {
 	return cli.Command{
-		Name:   "view",
-		Usage:  "View file",
-		Flags:  kmsFlags,
+		Name:  "view",
+		Usage: "View file",
+		Flags: append([]cli.Flag{
+			cli.BoolFlag{
+				Name:  "yaml",
+				Usage: "",
+			},
+		}, kmsFlags...),
 		Action: viewAction,
 	}
 }
 
 func viewAction(c *cli.Context) error {
-	if len(c.Args()) != 1 {
-		return xerrors.New("Specify one file")
+	if len(c.Args()) == 0 {
+		return xerrors.New("Specify at least one file")
 	}
-	filename := c.Args().First()
 
 	name := kmsNameFromContext(c)
-	fstat, err := os.Stat(filename)
-	if err != nil {
-		return err
+
+	raw := make(map[string][]byte)
+	for _, filename := range c.Args() {
+		// Skip dir
+		fstat, err := os.Stat(filename)
+		if err != nil {
+			return err
+		}
+		if fstat.IsDir() {
+			continue
+		}
+
+		plainText, err := getPlainText(name, filename)
+		if xerrors.Is(err, InvalidFormatError) {
+			plainText, err = ioutil.ReadFile(filename)
+			if err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
+		}
+
+		raw[filename] = plainText
 	}
-	if fstat.IsDir() {
-		return xerrors.Errorf("Skipping directory: %s\n", filename)
+	if len(raw) == 0 {
+		return xerrors.New("Specify at least one file")
 	}
 
-	err = decryptFileAndPrint(name, filename)
-	if err != nil {
-		return err
+	if c.Bool("yaml") {
+		result, err := convertToTemplateData(raw)
+		if err != nil {
+			return err
+		}
+		val, err := yaml.Marshal(result)
+		if err != nil {
+			return err
+		}
+		os.Stdout.Write(val)
+		return nil
 	}
-	return nil
-}
-
-func decryptFileAndPrint(name, filename string) error {
-	fp, err := os.OpenFile(filename, os.O_RDONLY, 0666)
-	if err != nil {
-		return xerrors.Errorf("open: %w", err)
-	}
-	defer fp.Close()
-
-	plainText, err := decryptFile(name, fp)
-	if err != nil {
-		return xerrors.Errorf("decryptFileAndPrint: %w", err)
+	if len(raw) == 1 {
+		for _, val := range raw {
+			fmt.Printf(string(val))
+		}
+	} else {
+		for filename, val := range raw {
+			fmt.Println(filename)
+			fmt.Println(string(val))
+		}
 	}
 
-	fmt.Println(string(plainText))
 	return nil
 }

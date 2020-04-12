@@ -24,6 +24,8 @@ func encryptAction(c *cli.Context) error {
 	}
 
 	name := kmsNameFromContext(c)
+
+	processed := false
 	for _, filename := range c.Args() {
 		// Skip dir
 		fstat, err := os.Stat(filename)
@@ -31,7 +33,6 @@ func encryptAction(c *cli.Context) error {
 			return err
 		}
 		if fstat.IsDir() {
-			log.Printf("Skipping directory: %s\n", filename)
 			continue
 		}
 
@@ -39,6 +40,11 @@ func encryptAction(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
+		processed = true
+	}
+
+	if !processed {
+		return xerrors.New("Specify at least one file")
 	}
 	return nil
 }
@@ -83,6 +89,5 @@ func encryptFile(name, filename string) error {
 	if err != nil {
 		return xerrors.Errorf("write: %w", err)
 	}
-	log.Printf("Encryption successful: %s\n", filename)
 	return nil
 }
