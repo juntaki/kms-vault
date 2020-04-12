@@ -15,12 +15,12 @@ func encryptCommand(kmsFlags []cli.Flag) cli.Command {
 		Name:   "encrypt",
 		Usage:  "Encrypt files",
 		Action: encryptAction,
+		Before: initializeKMS,
 		Flags:  kmsFlags,
 	}
 }
 
 func encryptAction(c *cli.Context) error {
-	name := kmsNameFromContext(c)
 	processed := false
 	for _, filename := range c.Args() {
 		// Skip dir
@@ -32,7 +32,7 @@ func encryptAction(c *cli.Context) error {
 			continue
 		}
 
-		err = encryptFile(name, filename)
+		err = encryptFileAndWrite(filename)
 		if err != nil {
 			return err
 		}
@@ -45,7 +45,7 @@ func encryptAction(c *cli.Context) error {
 	return nil
 }
 
-func encryptFile(name, filename string) error {
+func encryptFileAndWrite(filename string) error {
 	fp, err := os.OpenFile(filename, os.O_RDWR, 0666)
 	if err != nil {
 		return xerrors.Errorf("open: %w", err)
@@ -68,10 +68,8 @@ func encryptFile(name, filename string) error {
 		return xerrors.Errorf("readall: %w", err)
 	}
 
-	val, err := kmsEncrypt(
-		name,
-		file,
-	)
+	val, err := kmsClient.Encrypt(file)
+
 	if err != nil {
 		return err
 	}

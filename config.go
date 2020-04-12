@@ -2,61 +2,42 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 
-	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
 
-func configCommand(kmsFlags []cli.Flag) cli.Command {
-	return cli.Command{
-		Name:  "config",
-		Usage: "Create .kms-vault.yaml",
-		Flags: append([]cli.Flag{
-			cli.BoolFlag{
-				Name:  "w",
-				Usage: "Write to .kms-vault.yaml.",
-			},
-		}, kmsFlags...),
-		Action: configAction,
+const vaultConfigFilename = ".kms-vault.yaml"
+
+func loadConfig() (config *VaultConfig) {
+	config = &VaultConfig{
+		Location: "global",
 	}
-}
 
-type VaultConfig struct {
-	Project  string
-	Location string
-	KeyRing  string
-	Key      string
-}
-
-func configAction(c *cli.Context) error {
-	val, err := yaml.Marshal(VaultConfig{
-		Project:  c.String("project"),
-		Location: c.String("location"),
-		KeyRing:  c.String("keyring"),
-		Key:      c.String("key"),
-	})
-
+	dir, err := os.Getwd()
 	if err != nil {
-		return err
+		return
 	}
 
-	output := os.Stdout
-	if c.Bool("w") {
-		err := checkOverwrite(vaultConfigFilename)
-		if err != nil {
-			return err
+	for ; ; dir = filepath.Dir(dir) {
+		_, err := os.Stat(filepath.Join(dir, vaultConfigFilename))
+		if err == nil {
+			break
 		}
-		fp, err := os.Create(vaultConfigFilename)
-		if err != nil {
-			return err
+		if dir == filepath.Dir(dir) {
+			return
 		}
-		defer fp.Close()
-		output = fp
 	}
 
-	_, err = output.Write(val)
+	fp, err := os.Open(filepath.Join(dir, vaultConfigFilename))
 	if err != nil {
-		return err
+		return
 	}
-	return nil
+	defer fp.Close()
+	d := yaml.NewDecoder(fp)
+	err = d.Decode(config)
+	if err != nil {
+		return
+	}
+	return
 }

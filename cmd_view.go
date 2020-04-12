@@ -20,6 +20,7 @@ func viewCommand(kmsFlags []cli.Flag) cli.Command {
 				Usage: "View the parsed data to fill template",
 			},
 		}, kmsFlags...),
+		Before: initializeKMS,
 		Action: viewAction,
 	}
 }
@@ -28,8 +29,6 @@ func viewAction(c *cli.Context) error {
 	if len(c.Args()) == 0 {
 		return xerrors.New("Specify at least one file")
 	}
-
-	name := kmsNameFromContext(c)
 
 	raw := make(map[string][]byte)
 	for _, filename := range c.Args() {
@@ -42,7 +41,7 @@ func viewAction(c *cli.Context) error {
 			continue
 		}
 
-		plainText, err := getPlainText(name, filename)
+		plainText, err := getPlainText(filename)
 		if xerrors.Is(err, InvalidFormatError) {
 			plainText, err = ioutil.ReadFile(filename)
 			if err != nil {
