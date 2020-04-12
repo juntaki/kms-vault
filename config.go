@@ -9,7 +9,7 @@ import (
 func configCommand(kmsFlags []cli.Flag) cli.Command {
 	return cli.Command{
 		Name:   "config",
-		Usage:  "Create .vault config file",
+		Usage:  "Create .kmsvault.yaml config file",
 		Flags:  kmsFlags,
 		Action: configAction,
 	}
