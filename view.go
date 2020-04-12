@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
 )
 
 func viewCommand(kmsFlags []cli.Flag) cli.Command {
@@ -71,7 +72,7 @@ func viewAction(c *cli.Context) error {
 	}
 	if len(raw) == 1 {
 		for _, val := range raw {
-			fmt.Printf(string(val))
+			fmt.Print(string(val))
 		}
 	} else {
 		for filename, val := range raw {

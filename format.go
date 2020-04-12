@@ -5,12 +5,12 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+
 	"golang.org/x/xerrors"
 )
 
-var vaultHeaderMagic = "$VAULT;"
-var vaultHeaderInfo = vaultHeaderMagic + "0.1.0;CLOUD_KMS\n"
-var vaultHeaderSize = len([]byte(vaultHeaderInfo))
+const vaultHeaderMagic = "$VAULT;"
+const vaultHeaderInfo = vaultHeaderMagic + VaultVersion + ";CLOUD_KMS\n"
 
 var InvalidFormatError = xerrors.New("Not a vault file")
 
@@ -31,6 +31,5 @@ func parse(file []byte) ([]byte, error) {
 }
 
 func isVaultHeader(file []byte) bool {
-	// TODO: Parse version, if file format changes.a
 	return bytes.HasPrefix(file, []byte(vaultHeaderMagic))
 }

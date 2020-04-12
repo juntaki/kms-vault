@@ -1,30 +1,26 @@
 package main
 
 import (
-	"github.com/urfave/cli"
-	"golang.org/x/xerrors"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+
+	"github.com/urfave/cli"
+	"golang.org/x/xerrors"
 )
 
 func encryptCommand(kmsFlags []cli.Flag) cli.Command {
 	return cli.Command{
 		Name:   "encrypt",
 		Usage:  "Encrypt files",
-		Flags:  kmsFlags,
 		Action: encryptAction,
+		Flags:  kmsFlags,
 	}
 }
 
 func encryptAction(c *cli.Context) error {
-	if len(c.Args()) == 0 {
-		return xerrors.New("Specify at least one file")
-	}
-
 	name := kmsNameFromContext(c)
-
 	processed := false
 	for _, filename := range c.Args() {
 		// Skip dir
@@ -56,7 +52,7 @@ func encryptFile(name, filename string) error {
 	}
 	defer fp.Close()
 
-	headerByte := make([]byte, vaultHeaderSize)
+	headerByte := make([]byte, len([]byte(vaultHeaderInfo)))
 	_, err = fp.ReadAt(headerByte, 0)
 	if err != nil && err != io.EOF {
 		return xerrors.Errorf("read header: %w", err)

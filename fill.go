@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -73,6 +72,20 @@ func fillAction(c *cli.Context) error {
 		return err
 	}
 
+	output := os.Stdout
+	if outputFile := c.String("output"); outputFile != "" {
+		err := checkOverwrite(outputFile)
+		if err != nil {
+			return err
+		}
+		fp, err := os.Create(outputFile)
+		if err != nil {
+			return err
+		}
+		defer fp.Close()
+		output = fp
+	}
+
 	tmplString, err := ioutil.ReadFile(c.String("template-file"))
 	if err != nil {
 		return err
@@ -81,34 +94,25 @@ func fillAction(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-
-	output := os.Stdout
-	if outputFile := c.String("output"); outputFile != "" {
-		_, err := os.Stat(outputFile)
-		if err == nil {
-			fmt.Printf("File exist, overwrite? (y/N): ")
-			stdin := bufio.NewScanner(os.Stdin)
-			stdin.Scan()
-			text := stdin.Text()
-			if !(len(text) > 0 && strings.ToLower(strings.TrimSpace(text))[0] == 'y') {
-				log.Println("Aborted")
-				return nil
-			}
-		}
-
-		fp, err := os.OpenFile(outputFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-		if err != nil {
-			return err
-		}
-		defer fp.Close()
-		output = fp
-	}
-
 	err = tmpl.Execute(output, result)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
+	return nil
+}
+
+func checkOverwrite(outputFile string) error {
+	_, err := os.Stat(outputFile)
+	if err == nil {
+		fmt.Printf("File exist, overwrite? (y/N): ")
+		stdin := bufio.NewScanner(os.Stdin)
+		stdin.Scan()
+		text := stdin.Text()
+		if !(len(text) > 0 && strings.ToLower(strings.TrimSpace(text))[0] == 'y') {
+			return xerrors.New("Aborted")
+		}
+	}
 	return nil
 }
 

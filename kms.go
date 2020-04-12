@@ -1,9 +1,10 @@
 package main
 
 import (
-	cloudkms "cloud.google.com/go/kms/apiv1"
 	"context"
 	"fmt"
+
+	cloudkms "cloud.google.com/go/kms/apiv1"
 	"github.com/urfave/cli"
 	"golang.org/x/xerrors"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
@@ -32,7 +33,7 @@ func kmsEncrypt(name string, plaintext []byte) ([]byte, error) {
 	// Build the request.
 	req := &kmspb.EncryptRequest{
 		Name:      name,
-		Plaintext: []byte(plaintext),
+		Plaintext: plaintext,
 	}
 	// Call the API.
 	resp, err := client.Encrypt(ctx, req)

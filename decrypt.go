@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/urfave/cli"
-	"golang.org/x/xerrors"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/urfave/cli"
+	"golang.org/x/xerrors"
 )
 
 func decryptCommand(kmsFlags []cli.Flag) cli.Command {
@@ -18,12 +19,7 @@ func decryptCommand(kmsFlags []cli.Flag) cli.Command {
 }
 
 func decryptAction(c *cli.Context) error {
-	if len(c.Args()) == 0 {
-		return xerrors.New("Specify at least one file")
-	}
-
 	name := kmsNameFromContext(c)
-
 	processed := false
 	for _, filename := range c.Args() {
 		// Skip dir
@@ -73,7 +69,7 @@ func decryptFileAndWrite(name, filename string) error {
 }
 
 func decryptFile(name string, fp *os.File) ([]byte, error) {
-	headerByte := make([]byte, vaultHeaderSize)
+	headerByte := make([]byte, len([]byte(vaultHeaderInfo)))
 	_, err := fp.ReadAt(headerByte, 0)
 	if err != nil && err != io.EOF {
 		return nil, xerrors.Errorf("read header: %w", err)

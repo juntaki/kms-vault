@@ -1,12 +1,15 @@
 package main
 
 import (
-	"github.com/urfave/cli"
-	"gopkg.in/yaml.v2"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/urfave/cli"
+	"gopkg.in/yaml.v2"
 )
+
+const VaultVersion = "0.1.0"
 
 func main() {
 	log.SetFlags(log.Lshortfile | log.Lmicroseconds)
@@ -41,9 +44,15 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "kms-vault"
 	app.Usage = "Manage configuration file that partially contain confidential information in a repository using Cloud KMS."
-	app.Version = "0.1.0"
-	app.EnableBashCompletion = true
 
+	app.Version = VaultVersion
+	app.Authors = []cli.Author{
+		{
+			Name:  "Jumpei Takiyasu",
+			Email: "me@juntaki.com",
+		},
+	}
+	app.Copyright = "(c) 2020 Jumpei Takiyasu"
 	app.Commands = []cli.Command{
 		encryptCommand(kmsFlags),
 		decryptCommand(kmsFlags),
