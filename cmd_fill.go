@@ -24,6 +24,7 @@ func fillCommand(kmsFlags []cli.Flag) cli.Command {
 				Usage: "File path of output.",
 			},
 		}, kmsFlags...),
+		Before: initializeKMS,
 		Action: fillAction,
 	}
 }
