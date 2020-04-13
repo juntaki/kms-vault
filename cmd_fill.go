@@ -76,7 +76,7 @@ func fillAction(c *cli.Context) error {
 		output = fp
 	}
 
-	tmplString, err := ioutil.ReadFile(c.String("template-file"))
+	tmplString, err := ioutil.ReadFile(c.String("template"))
 	if err != nil {
 		return err
 	}
