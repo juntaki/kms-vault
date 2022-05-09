@@ -5,14 +5,12 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-
-	"golang.org/x/xerrors"
 )
 
 const vaultHeaderMagic = "$VAULT;"
 const vaultHeaderInfo = vaultHeaderMagic + VaultVersion + ";CLOUD_KMS\n"
 
-var InvalidFormatError = xerrors.New("Not a vault file")
+var InvalidFormatError = fmt.Errorf("not a vault file")
 
 func format(ciphertext []byte) []byte {
 	return []byte(fmt.Sprintf("%s%s",

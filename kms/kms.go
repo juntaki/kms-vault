@@ -6,7 +6,6 @@ import (
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
 	"github.com/urfave/cli"
-	"golang.org/x/xerrors"
 	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
@@ -19,7 +18,7 @@ func NewKMSClient(c *cli.Context) (*Client, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("cloudkms.NewKeyManagementClient: %w", err)
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %w", err)
 	}
 	name := nameFromContext(c)
 	return &Client{client: client, name: name}, nil
@@ -71,7 +70,7 @@ func (c *Client) Encrypt(plaintext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("cloudkms.NewKeyManagementClient: %w", err)
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %w", err)
 	}
 
 	// Build the request.
@@ -82,7 +81,7 @@ func (c *Client) Encrypt(plaintext []byte) ([]byte, error) {
 	// Call the API.
 	resp, err := client.Encrypt(ctx, req)
 	if err != nil {
-		return nil, xerrors.Errorf("Encrypt: %w", err)
+		return nil, fmt.Errorf("Encrypt: %w", err)
 	}
 
 	return resp.Ciphertext, nil
@@ -92,7 +91,7 @@ func (c *Client) Decrypt(ciphertext []byte) ([]byte, error) {
 	ctx := context.Background()
 	client, err := cloudkms.NewKeyManagementClient(ctx)
 	if err != nil {
-		return nil, xerrors.Errorf("cloudkms.NewKeyManagementClient: %w", err)
+		return nil, fmt.Errorf("cloudkms.NewKeyManagementClient: %w", err)
 	}
 
 	// Build the request.
@@ -103,7 +102,7 @@ func (c *Client) Decrypt(ciphertext []byte) ([]byte, error) {
 	// Call the API.
 	resp, err := client.Decrypt(ctx, req)
 	if err != nil {
-		return nil, xerrors.Errorf("decrypt: %w", err)
+		return nil, fmt.Errorf("decrypt: %w", err)
 	}
 	return resp.Plaintext, nil
 }

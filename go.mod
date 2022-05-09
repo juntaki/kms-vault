@@ -5,7 +5,6 @@ go 1.18
 require (
 	cloud.google.com/go/kms v1.4.0
 	github.com/urfave/cli v1.22.9
-	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f
 	google.golang.org/genproto v0.0.0-20220505152158-f39f71e6c8f3
 	gopkg.in/yaml.v2 v2.4.0
 )
