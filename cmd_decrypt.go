@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/urfave/cli"
-	"golang.org/x/xerrors"
 )
 
 func decryptCommand(kmsFlags []cli.Flag) cli.Command {
@@ -37,7 +37,7 @@ func decryptAction(c *cli.Context) error {
 	}
 
 	if !processed {
-		return xerrors.New("Specify at least one file")
+		return fmt.Errorf("specify at least one file")
 	}
 	return nil
 }
@@ -45,23 +45,23 @@ func decryptAction(c *cli.Context) error {
 func decryptFileAndWrite(filename string) error {
 	fp, err := os.OpenFile(filename, os.O_RDWR, 0666)
 	if err != nil {
-		return xerrors.Errorf("open: %w", err)
+		return fmt.Errorf("open: %w", err)
 	}
 	defer fp.Close()
 
 	plainText, err := decryptFile(fp)
 	if err != nil {
-		return xerrors.Errorf("decryptFileAndPrint: %w", err)
+		return fmt.Errorf("decryptFileAndPrint: %w", err)
 	}
 
 	err = fp.Truncate(0)
 	if err != nil {
-		return xerrors.Errorf("truncate: %w", err)
+		return fmt.Errorf("truncate: %w", err)
 	}
 
 	_, err = fp.WriteAt(plainText, 0)
 	if err != nil {
-		return xerrors.Errorf("write: %w", err)
+		return fmt.Errorf("write: %w", err)
 	}
 	return nil
 }
