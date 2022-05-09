@@ -64,6 +64,7 @@ get_binaries() {
   case "$PLATFORM" in
     darwin/386) BINARIES="kms-vault" ;;
     darwin/amd64) BINARIES="kms-vault" ;;
+    darwin/arm64) BINARIES="kms-vault" ;;
     linux/386) BINARIES="kms-vault" ;;
     linux/amd64) BINARIES="kms-vault" ;;
     *)
