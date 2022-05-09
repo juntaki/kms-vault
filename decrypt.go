@@ -15,7 +15,7 @@ func decryptFile(fp *os.File) ([]byte, error) {
 	}
 
 	if !isVaultHeader(headerByte) {
-		return nil, InvalidFormatError
+		return nil, ErrorInvalidFormat
 	}
 
 	file, err := ioutil.ReadAll(fp)

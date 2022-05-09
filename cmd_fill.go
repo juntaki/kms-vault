@@ -43,7 +43,7 @@ func fillAction(c *cli.Context) error {
 		}
 
 		plainText, err := getPlainText(filename)
-		if errors.Is(err, InvalidFormatError) {
+		if errors.Is(err, ErrorInvalidFormat) {
 			plainText, err = ioutil.ReadFile(filename)
 			if err != nil {
 				return err
