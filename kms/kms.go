@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	cloudkms "cloud.google.com/go/kms/apiv1"
+	"cloud.google.com/go/kms/apiv1/kmspb"
 	"github.com/urfave/cli"
-	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
 )
 
 type Client struct {
