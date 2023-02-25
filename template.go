@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
-	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -29,12 +29,12 @@ func convertToTemplateData(raw map[string][]byte) (map[string]interface{}, error
 			}
 
 			if _, ok := result[templateDataID(filename)]; ok {
-				return nil, xerrors.Errorf("duplicate filename: %s", templateDataID(filename))
+				return nil, fmt.Errorf("duplicate filename: %s", templateDataID(filename))
 			}
 			result[templateDataID(filename)] = d
 		} else {
 			if _, ok := result[templateDataID(filename)]; ok {
-				return nil, xerrors.Errorf("duplicate filename: %s", templateDataID(filename))
+				return nil, fmt.Errorf("duplicate filename: %s", templateDataID(filename))
 			}
 			result[templateDataID(filename)] = string(plainText)
 		}

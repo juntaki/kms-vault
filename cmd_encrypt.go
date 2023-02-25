@@ -1,13 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/urfave/cli"
-	"golang.org/x/xerrors"
 )
 
 func encryptCommand(kmsFlags []cli.Flag) cli.Command {
@@ -40,7 +40,7 @@ func encryptAction(c *cli.Context) error {
 	}
 
 	if !processed {
-		return xerrors.New("Specify at least one file")
+		return fmt.Errorf("specify at least one file")
 	}
 	return nil
 }
@@ -48,14 +48,14 @@ func encryptAction(c *cli.Context) error {
 func encryptFileAndWrite(filename string) error {
 	fp, err := os.OpenFile(filename, os.O_RDWR, 0666)
 	if err != nil {
-		return xerrors.Errorf("open: %w", err)
+		return fmt.Errorf("open: %w", err)
 	}
 	defer fp.Close()
 
 	headerByte := make([]byte, len([]byte(vaultHeaderInfo)))
 	_, err = fp.ReadAt(headerByte, 0)
 	if err != nil && err != io.EOF {
-		return xerrors.Errorf("read header: %w", err)
+		return fmt.Errorf("read header: %w", err)
 	}
 
 	if isVaultHeader(headerByte) {
@@ -65,7 +65,7 @@ func encryptFileAndWrite(filename string) error {
 
 	file, err := ioutil.ReadAll(fp)
 	if err != nil {
-		return xerrors.Errorf("readall: %w", err)
+		return fmt.Errorf("readall: %w", err)
 	}
 
 	val, err := kmsClient.Encrypt(file)
@@ -76,12 +76,12 @@ func encryptFileAndWrite(filename string) error {
 
 	err = fp.Truncate(0)
 	if err != nil {
-		return xerrors.Errorf("truncate: %w", err)
+		return fmt.Errorf("truncate: %w", err)
 	}
 
 	_, err = fp.WriteAt(format(val), 0)
 	if err != nil {
-		return xerrors.Errorf("write: %w", err)
+		return fmt.Errorf("write: %w", err)
 	}
 	return nil
 }

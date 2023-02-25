@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	"golang.org/x/xerrors"
 )
 
 func checkOverwrite(outputFile string) error {
@@ -17,7 +15,7 @@ func checkOverwrite(outputFile string) error {
 		stdin.Scan()
 		text := stdin.Text()
 		if !(len(text) > 0 && strings.ToLower(strings.TrimSpace(text))[0] == 'y') {
-			return xerrors.New("Aborted")
+			return fmt.Errorf("Aborted")
 		}
 	}
 	return nil

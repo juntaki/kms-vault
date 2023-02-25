@@ -1,12 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 
 	"github.com/urfave/cli"
-	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -27,7 +27,7 @@ func viewCommand(kmsFlags []cli.Flag) cli.Command {
 
 func viewAction(c *cli.Context) error {
 	if len(c.Args()) == 0 {
-		return xerrors.New("Specify at least one file")
+		return fmt.Errorf("specify at least one file")
 	}
 
 	raw := make(map[string][]byte)
@@ -42,7 +42,7 @@ func viewAction(c *cli.Context) error {
 		}
 
 		plainText, err := getPlainText(filename)
-		if xerrors.Is(err, InvalidFormatError) {
+		if errors.Is(err, ErrorInvalidFormat) {
 			plainText, err = ioutil.ReadFile(filename)
 			if err != nil {
 				return err
@@ -54,7 +54,7 @@ func viewAction(c *cli.Context) error {
 		raw[filename] = plainText
 	}
 	if len(raw) == 0 {
-		return xerrors.New("Specify at least one file")
+		return fmt.Errorf("specify at least one file")
 	}
 
 	if c.Bool("yaml") {

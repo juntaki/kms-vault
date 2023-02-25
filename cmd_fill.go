@@ -1,12 +1,13 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"text/template"
 
 	"github.com/urfave/cli"
-	"golang.org/x/xerrors"
 )
 
 func fillCommand(kmsFlags []cli.Flag) cli.Command {
@@ -42,7 +43,7 @@ func fillAction(c *cli.Context) error {
 		}
 
 		plainText, err := getPlainText(filename)
-		if xerrors.Is(err, InvalidFormatError) {
+		if errors.Is(err, ErrorInvalidFormat) {
 			plainText, err = ioutil.ReadFile(filename)
 			if err != nil {
 				return err
@@ -54,7 +55,7 @@ func fillAction(c *cli.Context) error {
 		raw[filename] = plainText
 	}
 	if len(raw) == 0 {
-		return xerrors.New("Specify at least one file")
+		return fmt.Errorf("specify at least one file")
 	}
 
 	result, err := convertToTemplateData(raw)
