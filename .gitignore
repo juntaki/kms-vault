@@ -1,3 +1,5 @@
 .idea
 .kms-vault.yaml
 dist
+
+dist/
